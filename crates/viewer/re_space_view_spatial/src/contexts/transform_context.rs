@@ -4,13 +4,13 @@ use re_chunk_store::LatestAtQuery;
 use re_entity_db::{EntityDb, EntityPath, EntityTree};
 use re_space_view::DataResultQuery as _;
 use re_types::{
-    archetypes::Pinhole,
+    archetypes::{Pinhole, Transform3D},
     components::{
         DisconnectedSpace, ImagePlaneDistance, OutOfTreeTransform, PinholeProjection,
-        RotationAxisAngle, RotationQuat, Scale3D, Transform3D, TransformMat3x3, TransformRelation,
+        RotationAxisAngle, RotationQuat, Scale3D, TransformMat3x3, TransformRelation,
         Translation3D, ViewCoordinates,
     },
-    ComponentNameSet, Loggable as _,
+    Archetype, ComponentNameSet, Loggable as _,
 };
 use re_viewer_context::{IdentifiedViewSystem, ViewContext, ViewContextSystem};
 
@@ -107,7 +107,7 @@ impl Default for TransformContext {
 impl ViewContextSystem for TransformContext {
     fn compatible_component_sets(&self) -> Vec<ComponentNameSet> {
         vec![
-            std::iter::once(Transform3D::name()).collect(),
+            Transform3D::all_components().iter().copied().collect(),
             std::iter::once(PinholeProjection::name()).collect(),
             std::iter::once(DisconnectedSpace::name()).collect(),
         ]
@@ -460,7 +460,6 @@ pub fn fallback_for_out_of_tree_transform(ctx: &re_viewer_context::QueryContext<
         ctx.query,
         ctx.target_entity_path,
         [
-            Transform3D::name(),
             Translation3D::name(),
             RotationAxisAngle::name(),
             RotationQuat::name(),
@@ -492,7 +491,6 @@ fn query_and_resolve_transforms_at_entity(
         query,
         entity_path,
         [
-            Transform3D::name(),
             Translation3D::name(),
             RotationAxisAngle::name(),
             RotationQuat::name(),
