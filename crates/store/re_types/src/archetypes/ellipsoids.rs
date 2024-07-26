@@ -26,6 +26,11 @@ use ::re_types_core::{DeserializationError, DeserializationResult};
 ///
 /// Currently, ellipsoids are always rendered as wireframes.
 /// Opaque and transparent rendering will be supported later.
+///
+/// The axis of the ellipsoid are aligned with axes of the coordinate system.
+/// Use [`archetypes.Transform3D`] to rotate the ellipsoid(s) freely.
+/// If you have several ellipsoids, you can transform them individually by logging arrays of transform components
+/// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
 #[derive(Clone, Debug, PartialEq)]
 pub struct Ellipsoids {
     /// For each ellipsoid, half of its size on its three axes.
@@ -37,11 +42,6 @@ pub struct Ellipsoids {
     ///
     /// If not specified, the centers will be at (0, 0, 0).
     pub centers: Option<Vec<crate::components::Position3D>>,
-
-    /// Optional rotations of the ellipsoids.
-    ///
-    /// If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
-    pub rotations: Option<Vec<crate::components::Rotation3D>>,
 
     /// Optional colors for the ellipsoids.
     pub colors: Option<Vec<crate::components::Color>>,
@@ -66,7 +66,6 @@ impl ::re_types_core::SizeBytes for Ellipsoids {
     fn heap_size_bytes(&self) -> u64 {
         self.half_sizes.heap_size_bytes()
             + self.centers.heap_size_bytes()
-            + self.rotations.heap_size_bytes()
             + self.colors.heap_size_bytes()
             + self.line_radii.heap_size_bytes()
             + self.fill_mode.heap_size_bytes()
@@ -78,7 +77,6 @@ impl ::re_types_core::SizeBytes for Ellipsoids {
     fn is_pod() -> bool {
         <Vec<crate::components::HalfSize3D>>::is_pod()
             && <Option<Vec<crate::components::Position3D>>>::is_pod()
-            && <Option<Vec<crate::components::Rotation3D>>>::is_pod()
             && <Option<Vec<crate::components::Color>>>::is_pod()
             && <Option<Vec<crate::components::Radius>>>::is_pod()
             && <Option<crate::components::FillMode>>::is_pod()
@@ -90,11 +88,10 @@ impl ::re_types_core::SizeBytes for Ellipsoids {
 static REQUIRED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 1usize]> =
     once_cell::sync::Lazy::new(|| ["rerun.components.HalfSize3D".into()]);
 
-static RECOMMENDED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 4usize]> =
+static RECOMMENDED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 3usize]> =
     once_cell::sync::Lazy::new(|| {
         [
             "rerun.components.Position3D".into(),
-            "rerun.components.Rotation3D".into(),
             "rerun.components.Color".into(),
             "rerun.components.EllipsoidsIndicator".into(),
         ]
@@ -110,12 +107,11 @@ static OPTIONAL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 4usize]> =
         ]
     });
 
-static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 9usize]> =
+static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 8usize]> =
     once_cell::sync::Lazy::new(|| {
         [
             "rerun.components.HalfSize3D".into(),
             "rerun.components.Position3D".into(),
-            "rerun.components.Rotation3D".into(),
             "rerun.components.Color".into(),
             "rerun.components.EllipsoidsIndicator".into(),
             "rerun.components.Radius".into(),
@@ -126,8 +122,8 @@ static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 9usize]> =
     });
 
 impl Ellipsoids {
-    /// The total number of components in the archetype: 1 required, 4 recommended, 4 optional
-    pub const NUM_COMPONENTS: usize = 9usize;
+    /// The total number of components in the archetype: 1 required, 3 recommended, 4 optional
+    pub const NUM_COMPONENTS: usize = 8usize;
 }
 
 /// Indicator component for the [`Ellipsoids`] [`::re_types_core::Archetype`]
@@ -206,18 +202,6 @@ impl ::re_types_core::Archetype for Ellipsoids {
         } else {
             None
         };
-        let rotations = if let Some(array) = arrays_by_name.get("rerun.components.Rotation3D") {
-            Some({
-                <crate::components::Rotation3D>::from_arrow_opt(&**array)
-                    .with_context("rerun.archetypes.Ellipsoids#rotations")?
-                    .into_iter()
-                    .map(|v| v.ok_or_else(DeserializationError::missing_data))
-                    .collect::<DeserializationResult<Vec<_>>>()
-                    .with_context("rerun.archetypes.Ellipsoids#rotations")?
-            })
-        } else {
-            None
-        };
         let colors = if let Some(array) = arrays_by_name.get("rerun.components.Color") {
             Some({
                 <crate::components::Color>::from_arrow_opt(&**array)
@@ -278,7 +262,6 @@ impl ::re_types_core::Archetype for Ellipsoids {
         Ok(Self {
             half_sizes,
             centers,
-            rotations,
             colors,
             line_radii,
             fill_mode,
@@ -296,9 +279,6 @@ impl ::re_types_core::AsComponents for Ellipsoids {
             Some(Self::indicator()),
             Some((&self.half_sizes as &dyn ComponentBatch).into()),
             self.centers
-                .as_ref()
-                .map(|comp_batch| (comp_batch as &dyn ComponentBatch).into()),
-            self.rotations
                 .as_ref()
                 .map(|comp_batch| (comp_batch as &dyn ComponentBatch).into()),
             self.colors
@@ -332,7 +312,6 @@ impl Ellipsoids {
         Self {
             half_sizes: half_sizes.into_iter().map(Into::into).collect(),
             centers: None,
-            rotations: None,
             colors: None,
             line_radii: None,
             fill_mode: None,
@@ -350,18 +329,6 @@ impl Ellipsoids {
         centers: impl IntoIterator<Item = impl Into<crate::components::Position3D>>,
     ) -> Self {
         self.centers = Some(centers.into_iter().map(Into::into).collect());
-        self
-    }
-
-    /// Optional rotations of the ellipsoids.
-    ///
-    /// If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
-    #[inline]
-    pub fn with_rotations(
-        mut self,
-        rotations: impl IntoIterator<Item = impl Into<crate::components::Rotation3D>>,
-    ) -> Self {
-        self.rotations = Some(rotations.into_iter().map(Into::into).collect());
         self
     }
 

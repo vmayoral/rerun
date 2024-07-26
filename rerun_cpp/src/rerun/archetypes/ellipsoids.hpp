@@ -11,7 +11,6 @@
 #include "../components/half_size3d.hpp"
 #include "../components/position3d.hpp"
 #include "../components/radius.hpp"
-#include "../components/rotation3d.hpp"
 #include "../components/text.hpp"
 #include "../data_cell.hpp"
 #include "../indicator_component.hpp"
@@ -31,6 +30,11 @@ namespace rerun::archetypes {
     ///
     /// Currently, ellipsoids are always rendered as wireframes.
     /// Opaque and transparent rendering will be supported later.
+    ///
+    /// The axis of the ellipsoid are aligned with axes of the coordinate system.
+    /// Use [`archetypes.Transform3D`] to rotate the ellipsoid(s) freely.
+    /// If you have several ellipsoids, you can transform them individually by logging arrays of transform components
+    /// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
     struct Ellipsoids {
         /// For each ellipsoid, half of its size on its three axes.
         ///
@@ -41,11 +45,6 @@ namespace rerun::archetypes {
         ///
         /// If not specified, the centers will be at (0, 0, 0).
         std::optional<Collection<rerun::components::Position3D>> centers;
-
-        /// Optional rotations of the ellipsoids.
-        ///
-        /// If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
-        std::optional<Collection<rerun::components::Rotation3D>> rotations;
 
         /// Optional colors for the ellipsoids.
         std::optional<Collection<rerun::components::Color>> colors;
@@ -114,15 +113,6 @@ namespace rerun::archetypes {
         /// If not specified, the centers will be at (0, 0, 0).
         Ellipsoids with_centers(Collection<rerun::components::Position3D> _centers) && {
             centers = std::move(_centers);
-            // See: https://github.com/rerun-io/rerun/issues/4027
-            RR_WITH_MAYBE_UNINITIALIZED_DISABLED(return std::move(*this);)
-        }
-
-        /// Optional rotations of the ellipsoids.
-        ///
-        /// If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
-        Ellipsoids with_rotations(Collection<rerun::components::Rotation3D> _rotations) && {
-            rotations = std::move(_rotations);
             // See: https://github.com/rerun-io/rerun/issues/4027
             RR_WITH_MAYBE_UNINITIALIZED_DISABLED(return std::move(*this);)
         }

@@ -4,6 +4,11 @@ namespace rerun.archetypes;
 
 /// 3D boxes with half-extents and optional center, rotations, colors etc.
 ///
+/// The axis of the boxes are aligned with axes of the coordinate system (known as "axis aligned bounding box").
+/// Use [`archetypes.Transform3D`] to rotate the box(es) freely.
+/// If you have several boxes, you can transform them individually by logging arrays of transform components
+/// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+///
 /// \example archetypes/box3d_simple !api title="Simple 3D boxes" image="https://static.rerun.io/box3d_simple/d6a3f38d2e3360fbacac52bb43e44762635be9c8/1200w.png"
 /// \example archetypes/box3d_batch title="Batch of 3D boxes" image="https://static.rerun.io/box3d_batch/6d3e453c3a0201ae42bbae9de941198513535f1d/1200w.png"
 table Boxes3D (
@@ -23,11 +28,10 @@ table Boxes3D (
   /// Optional center positions of the boxes.
   centers: [rerun.components.Position3D] ("attr.rerun.component_recommended", nullable, order: 2000);
 
-  /// Optional rotations of the boxes.
-  rotations: [rerun.components.Rotation3D] ("attr.rerun.component_recommended", nullable, order: 2100);
-
   /// Optional colors for the boxes.
-  colors: [rerun.components.Color] ("attr.rerun.component_recommended", nullable, order: 2200);
+  colors: [rerun.components.Color] ("attr.rerun.component_recommended", nullable, order: 2100);
+
+  // TODO: add outoftreetransform
 
   // --- Optional ---
 

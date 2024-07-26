@@ -18,5 +18,4 @@ title: "RotationAxisAngle"
 
 ## Used by
 
-* [`Rotation3D`](../datatypes/rotation3d.md)
 * [`RotationAxisAngle`](../components/rotation_axis_angle.md?speculative-link)

@@ -5,11 +5,16 @@ title: "Boxes3D"
 
 3D boxes with half-extents and optional center, rotations, colors etc.
 
+The axis of the boxes are aligned with axes of the coordinate system (known as "axis aligned bounding box").
+Use [`archetypes.Transform3D`] to rotate the box(es) freely.
+If you have several boxes, you can transform them individually by logging arrays of transform components
+(this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+
 ## Components
 
 **Required**: [`HalfSize3D`](../components/half_size3d.md)
 
-**Recommended**: [`Position3D`](../components/position3d.md), [`Rotation3D`](../components/rotation3d.md), [`Color`](../components/color.md)
+**Recommended**: [`Position3D`](../components/position3d.md), [`Color`](../components/color.md)
 
 **Optional**: [`Radius`](../components/radius.md), [`FillMode`](../components/fill_mode.md), [`Text`](../components/text.md), [`ClassId`](../components/class_id.md)
 

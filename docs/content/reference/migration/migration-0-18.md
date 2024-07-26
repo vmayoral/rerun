@@ -46,7 +46,7 @@ Previously, the transform component was represented as one of several variants (
 
 Instead, there are now several components for translation/scale/rotation/matrices that can live side-by-side in the [3D transform archetype](https://rerun.io/docs/reference/types/archetypes/transform3d).
 
-For this purpose `TranslationRotationScale3D` and `TranslationAndMat3x3` datatypes & components have been removed and split up into new components:
+For this purpose `TranslationRotationScale3D`, `TranslationAndMat3x3` and `Rotation3D` datatypes & components have been removed and split up into new components:
 * [`Translation3D`](https://rerun.io/docs/reference/types/components/translation3d#speculative-link)
 * [`TransformMat3x3`](https://rerun.io/docs/reference/types/components/transform_mat3x3#speculative-link)
 * [`Scale3D`](https://rerun.io/docs/reference/types/components/scale3d#speculative-link)

@@ -12,11 +12,16 @@ For points whose radii are for the sake of visualization, use [`archetypes.Point
 Currently, ellipsoids are always rendered as wireframes.
 Opaque and transparent rendering will be supported later.
 
+The axis of the ellipsoid are aligned with axes of the coordinate system.
+Use [`archetypes.Transform3D`] to rotate the ellipsoid(s) freely.
+If you have several ellipsoids, you can transform them individually by logging arrays of transform components
+(this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+
 ## Components
 
 **Required**: [`HalfSize3D`](../components/half_size3d.md)
 
-**Recommended**: [`Position3D`](../components/position3d.md), [`Rotation3D`](../components/rotation3d.md), [`Color`](../components/color.md)
+**Recommended**: [`Position3D`](../components/position3d.md), [`Color`](../components/color.md)
 
 **Optional**: [`Radius`](../components/radius.md), [`FillMode`](../components/fill_mode.md), [`Text`](../components/text.md), [`ClassId`](../components/class_id.md)
 

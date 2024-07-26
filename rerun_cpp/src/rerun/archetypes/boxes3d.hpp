@@ -11,7 +11,6 @@
 #include "../components/half_size3d.hpp"
 #include "../components/position3d.hpp"
 #include "../components/radius.hpp"
-#include "../components/rotation3d.hpp"
 #include "../components/text.hpp"
 #include "../data_cell.hpp"
 #include "../indicator_component.hpp"
@@ -24,6 +23,11 @@
 
 namespace rerun::archetypes {
     /// **Archetype**: 3D boxes with half-extents and optional center, rotations, colors etc.
+    ///
+    /// The axis of the boxes are aligned with axes of the coordinate system (known as "axis aligned bounding box").
+    /// Use [`archetypes.Transform3D`] to rotate the box(es) freely.
+    /// If you have several boxes, you can transform them individually by logging arrays of transform components
+    /// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
     ///
     /// ## Example
     ///
@@ -66,9 +70,6 @@ namespace rerun::archetypes {
 
         /// Optional center positions of the boxes.
         std::optional<Collection<rerun::components::Position3D>> centers;
-
-        /// Optional rotations of the boxes.
-        std::optional<Collection<rerun::components::Rotation3D>> rotations;
 
         /// Optional colors for the boxes.
         std::optional<Collection<rerun::components::Color>> colors;
@@ -155,13 +156,6 @@ namespace rerun::archetypes {
         /// Optional center positions of the boxes.
         Boxes3D with_centers(Collection<rerun::components::Position3D> _centers) && {
             centers = std::move(_centers);
-            // See: https://github.com/rerun-io/rerun/issues/4027
-            RR_WITH_MAYBE_UNINITIALIZED_DISABLED(return std::move(*this);)
-        }
-
-        /// Optional rotations of the boxes.
-        Boxes3D with_rotations(Collection<rerun::components::Rotation3D> _rotations) && {
-            rotations = std::move(_rotations);
             // See: https://github.com/rerun-io/rerun/issues/4027
             RR_WITH_MAYBE_UNINITIALIZED_DISABLED(return std::move(*this);)
         }

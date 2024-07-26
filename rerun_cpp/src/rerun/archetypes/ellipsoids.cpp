@@ -14,7 +14,7 @@ namespace rerun {
     ) {
         using namespace archetypes;
         std::vector<DataCell> cells;
-        cells.reserve(9);
+        cells.reserve(8);
 
         {
             auto result = DataCell::from_loggable(archetype.half_sizes);
@@ -23,11 +23,6 @@ namespace rerun {
         }
         if (archetype.centers.has_value()) {
             auto result = DataCell::from_loggable(archetype.centers.value());
-            RR_RETURN_NOT_OK(result.error);
-            cells.push_back(std::move(result.value));
-        }
-        if (archetype.rotations.has_value()) {
-            auto result = DataCell::from_loggable(archetype.rotations.value());
             RR_RETURN_NOT_OK(result.error);
             cells.push_back(std::move(result.value));
         }

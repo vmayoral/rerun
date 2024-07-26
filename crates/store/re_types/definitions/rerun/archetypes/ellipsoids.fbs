@@ -11,6 +11,11 @@ namespace rerun.archetypes;
 /// Currently, ellipsoids are always rendered as wireframes.
 /// Opaque and transparent rendering will be supported later.
 ///
+/// The axis of the ellipsoid are aligned with axes of the coordinate system.
+/// Use [`archetypes.Transform3D`] to rotate the ellipsoid(s) freely.
+/// If you have several ellipsoids, you can transform them individually by logging arrays of transform components
+/// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+///
 /// \example archetypes/ellipsoid_batch !api title="Batch of ellipsoids"
 table Ellipsoids (
   "attr.rust.derive": "PartialEq",
@@ -34,13 +39,10 @@ table Ellipsoids (
   /// If not specified, the centers will be at (0, 0, 0).
   centers: [rerun.components.Position3D] ("attr.rerun.component_recommended", nullable, order: 2000);
 
-  /// Optional rotations of the ellipsoids.
-  ///
-  /// If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
-  rotations: [rerun.components.Rotation3D] ("attr.rerun.component_recommended", nullable, order: 2100);
-
   /// Optional colors for the ellipsoids.
   colors: [rerun.components.Color] ("attr.rerun.component_recommended", nullable, order: 2200);
+
+  // TODO: add outoftreetransform
 
   // --- Optional ---
 

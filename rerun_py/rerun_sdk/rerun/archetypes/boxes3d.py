@@ -21,6 +21,11 @@ class Boxes3D(Boxes3DExt, Archetype):
     """
     **Archetype**: 3D boxes with half-extents and optional center, rotations, colors etc.
 
+    The axis of the boxes are aligned with axes of the coordinate system (known as "axis aligned bounding box").
+    Use [`archetypes.Transform3D`] to rotate the box(es) freely.
+    If you have several boxes, you can transform them individually by logging arrays of transform components
+    (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+
     Example
     -------
     ### Batch of 3D boxes:
@@ -66,7 +71,6 @@ class Boxes3D(Boxes3DExt, Archetype):
         self.__attrs_init__(
             half_sizes=None,  # type: ignore[arg-type]
             centers=None,  # type: ignore[arg-type]
-            rotations=None,  # type: ignore[arg-type]
             colors=None,  # type: ignore[arg-type]
             radii=None,  # type: ignore[arg-type]
             fill_mode=None,  # type: ignore[arg-type]
@@ -95,15 +99,6 @@ class Boxes3D(Boxes3DExt, Archetype):
         converter=components.Position3DBatch._optional,  # type: ignore[misc]
     )
     # Optional center positions of the boxes.
-    #
-    # (Docstring intentionally commented out to hide this field from the docs)
-
-    rotations: components.Rotation3DBatch | None = field(
-        metadata={"component": "optional"},
-        default=None,
-        converter=components.Rotation3DBatch._optional,  # type: ignore[misc]
-    )
-    # Optional rotations of the boxes.
     #
     # (Docstring intentionally commented out to hide this field from the docs)
 

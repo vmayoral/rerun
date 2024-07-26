@@ -27,6 +27,11 @@ class Ellipsoids(EllipsoidsExt, Archetype):
 
     Currently, ellipsoids are always rendered as wireframes.
     Opaque and transparent rendering will be supported later.
+
+    The axis of the ellipsoid are aligned with axes of the coordinate system.
+    Use [`archetypes.Transform3D`] to rotate the ellipsoid(s) freely.
+    If you have several ellipsoids, you can transform them individually by logging arrays of transform components
+    (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
     """
 
     # __init__ can be found in ellipsoids_ext.py
@@ -36,7 +41,6 @@ class Ellipsoids(EllipsoidsExt, Archetype):
         self.__attrs_init__(
             half_sizes=None,  # type: ignore[arg-type]
             centers=None,  # type: ignore[arg-type]
-            rotations=None,  # type: ignore[arg-type]
             colors=None,  # type: ignore[arg-type]
             line_radii=None,  # type: ignore[arg-type]
             fill_mode=None,  # type: ignore[arg-type]
@@ -69,17 +73,6 @@ class Ellipsoids(EllipsoidsExt, Archetype):
     # Optional center positions of the ellipsoids.
     #
     # If not specified, the centers will be at (0, 0, 0).
-    #
-    # (Docstring intentionally commented out to hide this field from the docs)
-
-    rotations: components.Rotation3DBatch | None = field(
-        metadata={"component": "optional"},
-        default=None,
-        converter=components.Rotation3DBatch._optional,  # type: ignore[misc]
-    )
-    # Optional rotations of the ellipsoids.
-    #
-    # If not specified, the axes of the ellipsoid align with the axes of the coordinate system.
     #
     # (Docstring intentionally commented out to hide this field from the docs)
 

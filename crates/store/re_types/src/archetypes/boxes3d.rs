@@ -20,6 +20,11 @@ use ::re_types_core::{DeserializationError, DeserializationResult};
 
 /// **Archetype**: 3D boxes with half-extents and optional center, rotations, colors etc.
 ///
+/// The axis of the boxes are aligned with axes of the coordinate system (known as "axis aligned bounding box").
+/// Use [`archetypes.Transform3D`] to rotate the box(es) freely.
+/// If you have several boxes, you can transform them individually by logging arrays of transform components
+/// (this will automatically enable out-of-tree transform, meaning that transformation won't affect the children of this entity).
+///
 /// ## Example
 ///
 /// ### Batch of 3D boxes
@@ -68,9 +73,6 @@ pub struct Boxes3D {
     /// Optional center positions of the boxes.
     pub centers: Option<Vec<crate::components::Position3D>>,
 
-    /// Optional rotations of the boxes.
-    pub rotations: Option<Vec<crate::components::Rotation3D>>,
-
     /// Optional colors for the boxes.
     pub colors: Option<Vec<crate::components::Color>>,
 
@@ -97,7 +99,6 @@ impl ::re_types_core::SizeBytes for Boxes3D {
     fn heap_size_bytes(&self) -> u64 {
         self.half_sizes.heap_size_bytes()
             + self.centers.heap_size_bytes()
-            + self.rotations.heap_size_bytes()
             + self.colors.heap_size_bytes()
             + self.radii.heap_size_bytes()
             + self.fill_mode.heap_size_bytes()
@@ -109,7 +110,6 @@ impl ::re_types_core::SizeBytes for Boxes3D {
     fn is_pod() -> bool {
         <Vec<crate::components::HalfSize3D>>::is_pod()
             && <Option<Vec<crate::components::Position3D>>>::is_pod()
-            && <Option<Vec<crate::components::Rotation3D>>>::is_pod()
             && <Option<Vec<crate::components::Color>>>::is_pod()
             && <Option<Vec<crate::components::Radius>>>::is_pod()
             && <Option<crate::components::FillMode>>::is_pod()
@@ -121,11 +121,10 @@ impl ::re_types_core::SizeBytes for Boxes3D {
 static REQUIRED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 1usize]> =
     once_cell::sync::Lazy::new(|| ["rerun.components.HalfSize3D".into()]);
 
-static RECOMMENDED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 4usize]> =
+static RECOMMENDED_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 3usize]> =
     once_cell::sync::Lazy::new(|| {
         [
             "rerun.components.Position3D".into(),
-            "rerun.components.Rotation3D".into(),
             "rerun.components.Color".into(),
             "rerun.components.Boxes3DIndicator".into(),
         ]
@@ -141,12 +140,11 @@ static OPTIONAL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 4usize]> =
         ]
     });
 
-static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 9usize]> =
+static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 8usize]> =
     once_cell::sync::Lazy::new(|| {
         [
             "rerun.components.HalfSize3D".into(),
             "rerun.components.Position3D".into(),
-            "rerun.components.Rotation3D".into(),
             "rerun.components.Color".into(),
             "rerun.components.Boxes3DIndicator".into(),
             "rerun.components.Radius".into(),
@@ -157,8 +155,8 @@ static ALL_COMPONENTS: once_cell::sync::Lazy<[ComponentName; 9usize]> =
     });
 
 impl Boxes3D {
-    /// The total number of components in the archetype: 1 required, 4 recommended, 4 optional
-    pub const NUM_COMPONENTS: usize = 9usize;
+    /// The total number of components in the archetype: 1 required, 3 recommended, 4 optional
+    pub const NUM_COMPONENTS: usize = 8usize;
 }
 
 /// Indicator component for the [`Boxes3D`] [`::re_types_core::Archetype`]
@@ -237,18 +235,6 @@ impl ::re_types_core::Archetype for Boxes3D {
         } else {
             None
         };
-        let rotations = if let Some(array) = arrays_by_name.get("rerun.components.Rotation3D") {
-            Some({
-                <crate::components::Rotation3D>::from_arrow_opt(&**array)
-                    .with_context("rerun.archetypes.Boxes3D#rotations")?
-                    .into_iter()
-                    .map(|v| v.ok_or_else(DeserializationError::missing_data))
-                    .collect::<DeserializationResult<Vec<_>>>()
-                    .with_context("rerun.archetypes.Boxes3D#rotations")?
-            })
-        } else {
-            None
-        };
         let colors = if let Some(array) = arrays_by_name.get("rerun.components.Color") {
             Some({
                 <crate::components::Color>::from_arrow_opt(&**array)
@@ -309,7 +295,6 @@ impl ::re_types_core::Archetype for Boxes3D {
         Ok(Self {
             half_sizes,
             centers,
-            rotations,
             colors,
             radii,
             fill_mode,
@@ -327,9 +312,6 @@ impl ::re_types_core::AsComponents for Boxes3D {
             Some(Self::indicator()),
             Some((&self.half_sizes as &dyn ComponentBatch).into()),
             self.centers
-                .as_ref()
-                .map(|comp_batch| (comp_batch as &dyn ComponentBatch).into()),
-            self.rotations
                 .as_ref()
                 .map(|comp_batch| (comp_batch as &dyn ComponentBatch).into()),
             self.colors
@@ -363,7 +345,6 @@ impl Boxes3D {
         Self {
             half_sizes: half_sizes.into_iter().map(Into::into).collect(),
             centers: None,
-            rotations: None,
             colors: None,
             radii: None,
             fill_mode: None,
@@ -379,16 +360,6 @@ impl Boxes3D {
         centers: impl IntoIterator<Item = impl Into<crate::components::Position3D>>,
     ) -> Self {
         self.centers = Some(centers.into_iter().map(Into::into).collect());
-        self
-    }
-
-    /// Optional rotations of the boxes.
-    #[inline]
-    pub fn with_rotations(
-        mut self,
-        rotations: impl IntoIterator<Item = impl Into<crate::components::Rotation3D>>,
-    ) -> Self {
-        self.rotations = Some(rotations.into_iter().map(Into::into).collect());
         self
     }
 
