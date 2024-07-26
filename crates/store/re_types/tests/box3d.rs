@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use re_types::{archetypes::Boxes3D, components, datatypes, Archetype as _, AsComponents as _};
+use re_types::{archetypes::Boxes3D, components, Archetype as _, AsComponents as _};
 
 #[test]
 fn roundtrip() {
@@ -12,13 +12,6 @@ fn roundtrip() {
         centers: Some(vec![
             components::Position3D::new(1.0, 2.0, 3.0), //
             components::Position3D::new(4.0, 5.0, 6.0),
-        ]),
-        rotations: Some(vec![
-            components::Rotation3D::from(datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0])),
-            components::Rotation3D::from(datatypes::RotationAxisAngle::new(
-                [1.0, 2.0, 3.0],
-                datatypes::Angle::from_radians(4.0),
-            )),
         ]),
         colors: Some(vec![
             components::Color::from_unmultiplied_rgba(0xAA, 0x00, 0x00, 0xCC), //
@@ -41,13 +34,6 @@ fn roundtrip() {
 
     let arch = Boxes3D::from_half_sizes([(1.0, 2.0, 3.0), (4.0, 5.0, 6.0)])
         .with_centers([(1.0, 2.0, 3.0), (4.0, 5.0, 6.0)])
-        .with_rotations([
-            components::Rotation3D::from(datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0])),
-            components::Rotation3D::from(datatypes::RotationAxisAngle::new(
-                [1.0, 2.0, 3.0],
-                datatypes::Angle::from_radians(4.0),
-            )),
-        ])
         .with_colors([0xAA0000CC, 0x00BB00DD])
         .with_radii([42.0, 43.0])
         .with_fill_mode(components::FillMode::Solid)

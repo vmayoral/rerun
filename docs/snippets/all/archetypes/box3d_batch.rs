@@ -9,11 +9,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             [(2.0, 0.0, 0.0), (-2.0, 0.0, 0.0), (0.0, 0.0, 2.0)],
             [(2.0, 2.0, 1.0), (1.0, 1.0, 0.5), (2.0, 0.5, 1.0)],
         )
-        .with_rotations([
-            rerun::Rotation3D::IDENTITY,
-            rerun::Quaternion::from_xyzw([0.0, 0.0, 0.382683, 0.923880]).into(), // 45 degrees around Z
-            rerun::RotationAxisAngle::new((0.0, 1.0, 0.0), rerun::Angle::from_degrees(30.0)).into(),
-        ])
         .with_radii([0.025])
         .with_colors([
             rerun::Color::from_rgb(255, 0, 0),
@@ -22,6 +17,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ])
         .with_fill_mode(rerun::FillMode::Solid)
         .with_labels(["red", "green", "blue"]),
+    )?;
+    rec.log(
+        "batch",
+        &rerun::Transform3D::default().with_rotation_axis_angle([
+            rerun::RotationAxisAngle::IDENTITY,
+            rerun::RotationAxisAngle::new((0.0, 0.0, 1.0), rerun::Angle::from_degrees(45.0)),
+            rerun::RotationAxisAngle::new((0.0, 1.0, 0.0), rerun::Angle::from_degrees(30.0)),
+        ]),
     )?;
 
     Ok(())

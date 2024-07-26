@@ -5,9 +5,7 @@ use re_renderer::{
 };
 use re_types::{
     archetypes::Boxes3D,
-    components::{
-        ClassId, Color, FillMode, HalfSize3D, KeypointId, Position3D, Radius, Rotation3D, Text,
-    },
+    components::{ClassId, Color, FillMode, HalfSize3D, KeypointId, Position3D, Radius, Text},
 };
 use re_viewer_context::{
     auto_color_for_entity_path, ApplicableEntities, IdentifiedViewSystem, QueryContext,
@@ -88,18 +86,29 @@ impl Boxes3DVisualizer {
             let mut obj_space_bounding_box = re_math::BoundingBox::NOTHING;
 
             let centers = clamped_or(data.centers, &Position3D::ZERO);
-            let rotations = clamped_or(data.rotations, &Rotation3D::IDENTITY);
-            for (instance_index, (half_size, &center, rotation, radius, &color)) in
-                itertools::izip!(data.half_sizes, centers, rotations, radii, &colors).enumerate()
+            let out_of_tree_transforms = clamped_or(
+                &ent_context.transform_info.out_of_tree_transforms,
+                &glam::Affine3A::IDENTITY,
+            );
+
+            for (instance_index, (half_size, &center, ouf_of_tree_transform, radius, &color)) in
+                itertools::izip!(
+                    data.half_sizes,
+                    centers,
+                    out_of_tree_transforms,
+                    radii,
+                    &colors
+                )
+                .enumerate()
             {
                 let instance = Instance::from(instance_index as u64);
                 // Transform from a centered unit cube to this box in the entity's
                 // coordinate system.
-                let entity_from_mesh = glam::Affine3A::from_scale_rotation_translation(
-                    glam::Vec3::from(*half_size) * 2.0,
-                    rotation.0.into(),
-                    center.into(),
-                );
+                let entity_from_mesh = *ouf_of_tree_transform
+                    * glam::Affine3A {
+                        matrix3: glam::Mat3A::from_diagonal(half_size.0.into()),
+                        translation: center.0.into(),
+                    };
 
                 let proc_mesh_key = proc_mesh::ProcMeshKey::Cube;
 
@@ -191,7 +200,6 @@ struct Boxes3DComponentData<'a> {
 
     // Clamped to edge
     centers: &'a [Position3D],
-    rotations: &'a [Rotation3D],
     colors: &'a [Color],
     radii: &'a [Radius],
     labels: &'a [Text],
@@ -265,7 +273,6 @@ impl VisualizerSystem for Boxes3DVisualizer {
                 }
 
                 let centers = results.get_or_empty_dense(resolver)?;
-                let rotations = results.get_or_empty_dense(resolver)?;
                 let colors = results.get_or_empty_dense(resolver)?;
                 let fill_mode = results.get_or_empty_dense(resolver)?;
                 let radii = results.get_or_empty_dense(resolver)?;
@@ -291,10 +298,9 @@ impl VisualizerSystem for Boxes3DVisualizer {
                     }
                 }
 
-                let data = re_query::range_zip_1x7(
+                let data = re_query::range_zip_1x6(
                     half_sizes.range_indexed(),
                     centers.range_indexed(),
-                    rotations.range_indexed(),
                     colors.range_indexed(),
                     radii.range_indexed(),
                     labels.range_indexed(),
@@ -306,7 +312,6 @@ impl VisualizerSystem for Boxes3DVisualizer {
                         _index,
                         half_sizes,
                         centers,
-                        rotations,
                         colors,
                         radii,
                         labels,
@@ -316,7 +321,6 @@ impl VisualizerSystem for Boxes3DVisualizer {
                         Boxes3DComponentData {
                             half_sizes,
                             centers: centers.unwrap_or_default(),
-                            rotations: rotations.unwrap_or_default(),
                             colors: colors.unwrap_or_default(),
                             radii: radii.unwrap_or_default(),
                             // fill mode is currently a non-repeated component

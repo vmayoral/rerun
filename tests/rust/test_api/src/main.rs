@@ -17,7 +17,6 @@ use std::{collections::HashSet, f32::consts::TAU};
 use itertools::Itertools;
 use rerun::{
     archetypes::{Clear, SegmentationImage, TextLog},
-    datatypes::Quaternion,
     external::{re_log, re_types::components::TextLogLevel},
     EntityPath, RecordingStream, TransformRelation,
 };
@@ -32,29 +31,26 @@ fn test_bbox(rec: &RecordingStream) -> anyhow::Result<()> {
         "bbox_test/bbox",
         &Boxes3D::from_half_sizes([(1.0, 0.5, 0.25)])
             .with_colors([0x00FF00FF])
-            .with_rotations([Quaternion::from_xyzw([
-                0.0,
-                0.0,
-                (TAU / 8.0).sin(),
-                (TAU / 8.0).cos(),
-            ])])
             .with_radii([0.005])
             .with_labels(["box/t0"]),
     )?;
+    rec.log(
+        "bbox_test/bbox",
+        &rerun::Transform3D::from_quaternion_xyzw([0.0, 0.0, (TAU / 8.0).sin(), (TAU / 8.0).cos()]),
+    )?;
+
     rec.set_time_seconds("sim_time", 1f64);
 
     rec.log(
         "bbox_test/bbox",
         &Boxes3D::from_centers_and_half_sizes([(1.0, 0.0, 0.0)], [(1.0, 0.5, 0.25)])
             .with_colors([Color::from_rgb(255, 255, 0)])
-            .with_rotations([Quaternion::from_xyzw([
-                0.0,
-                0.0,
-                (TAU / 8.0).sin(),
-                (TAU / 8.0).cos(),
-            ])])
             .with_radii([0.01])
             .with_labels(["box/t1"]),
+    )?;
+    rec.log(
+        "bbox_test/bbox",
+        &rerun::Transform3D::from_quaternion_xyzw([0.0, 0.0, (TAU / 8.0).sin(), (TAU / 8.0).cos()]),
     )?;
 
     Ok(())

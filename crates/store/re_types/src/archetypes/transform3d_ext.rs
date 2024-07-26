@@ -1,5 +1,7 @@
 use crate::{
-    components::{Scale3D, TransformMat3x3, TransformRelation, Translation3D},
+    components::{
+        RotationAxisAngle, RotationQuat, Scale3D, TransformMat3x3, TransformRelation, Translation3D,
+    },
     Rotation3D,
 };
 
@@ -43,6 +45,33 @@ impl Transform3D {
     #[inline]
     pub fn from_rotation(rotation: impl Into<Rotation3D>) -> Self {
         Self::default().with_rotation(rotation)
+    }
+
+    /// From a quaternion rotation.
+    #[inline]
+    pub fn from_quaternion(quaternion: impl Into<RotationQuat>) -> Self {
+        Self {
+            quaternion: Some(vec![quaternion.into()]),
+            ..Self::default()
+        }
+    }
+
+    /// From a quaternion rotation.
+    #[inline]
+    pub fn from_quaternion_xyzw(xyxw: impl Into<[f32; 4]>) -> Self {
+        Self {
+            quaternion: Some(vec![xyxw.into().into()]),
+            ..Self::default()
+        }
+    }
+
+    /// From an axis angle rotation.
+    #[inline]
+    pub fn from_axis_angle(axis_angle: impl Into<RotationAxisAngle>) -> Self {
+        Self {
+            rotation_axis_angle: Some(vec![axis_angle.into()]),
+            ..Self::default()
+        }
     }
 
     /// From a scale

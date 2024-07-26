@@ -5,9 +5,7 @@ use re_renderer::{
 };
 use re_types::{
     archetypes::Ellipsoids,
-    components::{
-        ClassId, Color, FillMode, HalfSize3D, KeypointId, Position3D, Radius, Rotation3D, Text,
-    },
+    components::{ClassId, Color, FillMode, HalfSize3D, KeypointId, Position3D, Radius, Text},
 };
 use re_viewer_context::{
     auto_color_for_entity_path, ApplicableEntities, IdentifiedViewSystem, QueryContext,
@@ -115,7 +113,6 @@ impl EllipsoidsVisualizer {
                 process_color_slice(ctx, self, num_instances, &annotation_infos, data.colors);
 
             let centers = clamped_or(data.centers, &Position3D::ZERO);
-            let rotations = clamped_or(data.rotations, &Rotation3D::IDENTITY);
 
             self.0.ui_labels.extend(Self::process_labels(
                 entity_path,
@@ -134,18 +131,29 @@ impl EllipsoidsVisualizer {
                 .picking_object_id(re_renderer::PickingLayerObjectId(entity_path.hash64()));
 
             let mut obj_space_bounding_box = re_math::BoundingBox::NOTHING;
+            let out_of_tree_transforms = clamped_or(
+                &ent_context.transform_info.out_of_tree_transforms,
+                &glam::Affine3A::IDENTITY,
+            );
 
-            for (instance_index, (half_size, &center, rotation, radius, color)) in
-                itertools::izip!(data.half_sizes, centers, rotations, radii, colors).enumerate()
+            for (instance_index, (half_size, &center, ouf_of_tree_transform, radius, color)) in
+                itertools::izip!(
+                    data.half_sizes,
+                    centers,
+                    out_of_tree_transforms,
+                    radii,
+                    colors
+                )
+                .enumerate()
             {
                 let instance = Instance::from(instance_index as u64);
                 // Transform from a centered unit sphere to this ellipsoid in the entity's
                 // coordinate system.
-                let entity_from_mesh = glam::Affine3A::from_scale_rotation_translation(
-                    glam::Vec3::from(*half_size),
-                    rotation.0.into(),
-                    center.into(),
-                );
+                let entity_from_mesh = *ouf_of_tree_transform
+                    * glam::Affine3A {
+                        matrix3: glam::Mat3A::from_diagonal(half_size.0.into()),
+                        translation: center.0.into(),
+                    };
 
                 // TODO(kpreid): subdivisions should be configurable, and possibly dynamic based on
                 // either world size or screen size (depending on application).
@@ -238,7 +246,6 @@ struct EllipsoidsComponentData<'a> {
 
     // Clamped to edge
     centers: &'a [Position3D],
-    rotations: &'a [Rotation3D],
     colors: &'a [Color],
     line_radii: &'a [Radius],
     labels: &'a [Text],
@@ -315,7 +322,6 @@ impl VisualizerSystem for EllipsoidsVisualizer {
                 // line_builder.reserve_vertices(num_ellipsoids * sphere_mesh.vertex_count)?;
 
                 let centers = results.get_or_empty_dense(resolver)?;
-                let rotations = results.get_or_empty_dense(resolver)?;
                 let colors = results.get_or_empty_dense(resolver)?;
                 let line_radii = results.get_or_empty_dense(resolver)?;
                 let fill_mode = results.get_or_empty_dense(resolver)?;
@@ -323,10 +329,9 @@ impl VisualizerSystem for EllipsoidsVisualizer {
                 let class_ids = results.get_or_empty_dense(resolver)?;
                 let keypoint_ids = results.get_or_empty_dense(resolver)?;
 
-                let data = re_query::range_zip_1x8(
+                let data = re_query::range_zip_1x7(
                     half_sizes.range_indexed(),
                     centers.range_indexed(),
-                    rotations.range_indexed(),
                     colors.range_indexed(),
                     line_radii.range_indexed(),
                     fill_mode.range_indexed(),
@@ -339,7 +344,6 @@ impl VisualizerSystem for EllipsoidsVisualizer {
                         _index,
                         half_sizes,
                         centers,
-                        rotations,
                         colors,
                         line_radii,
                         fill_mode,
@@ -350,7 +354,6 @@ impl VisualizerSystem for EllipsoidsVisualizer {
                         EllipsoidsComponentData {
                             half_sizes,
                             centers: centers.unwrap_or_default(),
-                            rotations: rotations.unwrap_or_default(),
                             colors: colors.unwrap_or_default(),
                             line_radii: line_radii.unwrap_or_default(),
                             // fill mode is currently a non-repeated component

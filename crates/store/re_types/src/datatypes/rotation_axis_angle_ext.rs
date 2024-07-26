@@ -3,6 +3,12 @@ use super::RotationAxisAngle;
 use crate::datatypes::{Angle, Vec3D};
 
 impl RotationAxisAngle {
+    /// Identity rotation, representing no rotation.
+    pub const IDENTITY: Self = Self {
+        axis: Vec3D::new(1.0, 0.0, 0.0),
+        angle: Angle::ZERO,
+    };
+
     /// Create a new rotation from an axis and an angle.
     #[inline]
     pub fn new(axis: impl Into<Vec3D>, angle: impl Into<Angle>) -> Self {
