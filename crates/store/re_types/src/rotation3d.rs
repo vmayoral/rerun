@@ -52,3 +52,22 @@ impl From<datatypes::RotationAxisAngle> for Rotation3D {
         Self::AxisAngle(axis_angle.into())
     }
 }
+
+#[cfg(feature = "mint")]
+impl From<mint::Quaternion<f32>> for Rotation3D {
+    #[inline]
+    fn from(quaternion: mint::Quaternion<f32>) -> Self {
+        Self::Quaternion(quaternion.into())
+    }
+}
+
+#[cfg(feature = "mint")]
+impl From<Rotation3D> for mint::Quaternion<f32> {
+    #[inline]
+    fn from(rotation: Rotation3D) -> Self {
+        match rotation {
+            Rotation3D::Quaternion(quaternion) => quaternion.into(),
+            Rotation3D::AxisAngle(axis_angle) => axis_angle.into(),
+        }
+    }
+}

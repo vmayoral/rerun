@@ -17,3 +17,11 @@ impl From<RotationAxisAngle> for glam::Affine3A {
         Self::from_axis_angle(val.0.axis.into(), val.0.angle.radians())
     }
 }
+
+#[cfg(feature = "mint")]
+impl From<RotationAxisAngle> for mint::Quaternion<f32> {
+    #[inline]
+    fn from(rotation: RotationAxisAngle) -> Self {
+        rotation.0.into()
+    }
+}

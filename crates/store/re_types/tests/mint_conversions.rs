@@ -143,14 +143,16 @@ fn quaternion() {
 #[test]
 #[cfg(feature = "mint")]
 fn rotation3d() {
+    use re_types::Rotation3D;
+
     {
-        let datatype: datatypes::Rotation3D =
+        let datatype: Rotation3D =
             datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0]).into();
         let mint: mint::Quaternion<f32> = datatype.into();
         assert_eq!(mint, [1.0, 2.0, 3.0, 4.0].into());
     }
     {
-        let datatype: datatypes::Rotation3D = datatypes::RotationAxisAngle {
+        let datatype: Rotation3D = datatypes::RotationAxisAngle {
             axis: [1.0, 0.0, 0.0].into(),
             angle: datatypes::Angle::from_degrees(90.0),
         }
@@ -160,20 +162,20 @@ fn rotation3d() {
     }
     {
         let mint: mint::Quaternion<f32> = [1.0, 2.0, 3.0, 4.0].into();
-        let datatype: datatypes::Rotation3D = mint.into();
+        let datatype: Rotation3D = mint.into();
         assert_eq!(
             datatype,
             datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0]).into()
         );
     }
     {
-        let component: components::Rotation3D =
+        let component: Rotation3D =
             datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0]).into();
         let mint: mint::Quaternion<f32> = component.into();
         assert_eq!(mint, [1.0, 2.0, 3.0, 4.0].into());
     }
     {
-        let component: components::Rotation3D = datatypes::RotationAxisAngle {
+        let component: Rotation3D = datatypes::RotationAxisAngle {
             axis: [1.0, 0.0, 0.0].into(),
             angle: datatypes::Angle::from_degrees(90.0),
         }
@@ -183,7 +185,7 @@ fn rotation3d() {
     }
     {
         let mint: mint::Quaternion<f32> = [1.0, 2.0, 3.0, 4.0].into();
-        let component: components::Rotation3D = mint.into();
+        let component: Rotation3D = mint.into();
         assert_eq!(
             component,
             datatypes::Quaternion::from_xyzw([1.0, 2.0, 3.0, 4.0]).into()

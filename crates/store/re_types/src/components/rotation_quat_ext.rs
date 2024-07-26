@@ -15,3 +15,11 @@ impl From<RotationQuat> for glam::Affine3A {
         Self::from_quat(val.0.into())
     }
 }
+
+#[cfg(feature = "mint")]
+impl From<RotationQuat> for mint::Quaternion<f32> {
+    #[inline]
+    fn from(rotation: RotationQuat) -> Self {
+        rotation.0.into()
+    }
+}
