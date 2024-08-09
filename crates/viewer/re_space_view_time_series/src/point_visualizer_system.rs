@@ -176,8 +176,6 @@ impl SeriesPointSystem {
             },
         };
 
-        let mut points;
-
         let time_range = determine_time_range(
             view_query.latest_at,
             data_result,
@@ -222,23 +220,31 @@ impl SeriesPointSystem {
             };
 
             // Allocate all points.
-            {
+            let mut points = {
                 re_tracing::profile_scope!("alloc");
 
-                points = all_scalar_chunks
+                let num_points = all_scalar_chunks
+                    .iter()
+                    .map(|chunk| {
+                        chunk.num_events_for_component(Scalar::name()).unwrap_or(0) as usize
+                    })
+                    .sum();
+                vec![default_point.clone(); num_points]
+            };
+
+            // Determine time values for each point
+            {
+                re_tracing::profile_scope!("fill times");
+
+                for ((data_time, _), point) in all_scalar_chunks
                     .iter()
                     .flat_map(|chunk| {
                         chunk.iter_component_indices(&query.timeline(), &Scalar::name())
                     })
-                    .map(|(data_time, _)| {
-                        debug_assert_eq!(Scalar::arrow_datatype(), ArrowDatatype::Float64);
-
-                        PlotPoint {
-                            time: data_time.as_i64(),
-                            ..default_point.clone()
-                        }
-                    })
-                    .collect_vec();
+                    .zip(points.iter_mut())
+                {
+                    point.time = data_time.as_i64();
+                }
             }
 
             // Fill in values.
