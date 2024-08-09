@@ -834,7 +834,7 @@ impl Chunk {
     }
 
     #[inline]
-    pub fn row_ids(&self) -> impl Iterator<Item = RowId> + '_ {
+    pub fn row_ids(&self) -> impl ExactSizeIterator<Item = RowId> + '_ {
         let (times, counters) = self.row_ids_raw();
         izip!(times.values().as_slice(), counters.values().as_slice())
             .map(|(&time, &counter)| RowId::from_u128((time as u128) << 64 | (counter as u128)))
