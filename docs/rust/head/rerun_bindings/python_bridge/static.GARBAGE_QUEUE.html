@@ -6,7 +6,7 @@ callback (see Arrow spec) that will be run when the data gets dropped.</p>
 which is something that should only happen at very specific times, else we end up with deadlocks,
 segfaults, aborts…</p>
 <h3 id="the-garbage-queue"><a href="#the-garbage-queue">The garbage queue</a></h3>
-<p>When a <a href="../../re_log_types/enum.LogMsg.html" title="enum re_log_types::LogMsg"><code>re_log_types::LogMsg</code></a> that was logged from Python gets dropped on the Rust side, it will end up
+<p>When a [<code>re_log_types::LogMsg</code>] that was logged from Python gets dropped on the Rust side, it will end up
 in this queue.</p>
 <p>The mere fact that the data still exists in this queue prevents the underlying Arrow refcount
 to go below one, which in turn prevents the associated FFI <code>release</code> callback to run, which

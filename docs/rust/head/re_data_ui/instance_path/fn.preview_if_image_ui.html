@@ -3,8 +3,8 @@
     ctx: &amp;<a class="struct" href="../../re_viewer_context/viewer_context/struct.ViewerContext.html" title="struct re_viewer_context::viewer_context::ViewerContext">ViewerContext</a>&lt;'_&gt;,
     ui: &amp;mut Ui,
     ui_layout: <a class="enum" href="../../re_viewer_context/component_ui_registry/enum.UiLayout.html" title="enum re_viewer_context::component_ui_registry::UiLayout">UiLayout</a>,
-    query: &amp;<a class="struct" href="../../re_chunk/latest_at/struct.LatestAtQuery.html" title="struct re_chunk::latest_at::LatestAtQuery">LatestAtQuery</a>,
-    entity_path: &amp;<a class="struct" href="../../re_log_types/path/entity_path/struct.EntityPath.html" title="struct re_log_types::path::entity_path::EntityPath">EntityPath</a>,
-    component_map: &amp;IntMap&lt;<a class="struct" href="../../re_types_core/loggable/struct.ComponentName.html" title="struct re_types_core::loggable::ComponentName">ComponentName</a>, <a class="struct" href="../../re_chunk/helpers/struct.UnitChunkShared.html" title="struct re_chunk::helpers::UnitChunkShared">UnitChunkShared</a>&gt;
+    query: &amp;LatestAtQuery,
+    entity_path: &amp;EntityPath,
+    component_map: &amp;IntMap&lt;ComponentName, UnitChunkShared&gt;
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.76.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.76.0/std/primitive.unit.html">()</a>&gt;</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>If this entity is an image, show it together with buttons to download and copy the image.</p>
 </div></details></section></div></main></body></html>

@@ -12,7 +12,7 @@
     rerun_rx: ReceiveSet&lt;LogMsg&gt;,
     bind_ip: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.76.0/std/primitive.str.html">str</a>,
     port: <a class="struct" href="../struct.RerunServerPort.html" title="struct re_ws_comms::RerunServerPort">RerunServerPort</a>,
-    server_memory_limit: MemoryLimit
+    server_memory_limit: <a class="struct" href="../../re_memory/memory_limit/struct.MemoryLimit.html" title="struct re_memory::memory_limit::MemoryLimit">MemoryLimit</a>
 ) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.76.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;Self, <a class="enum" href="../enum.RerunServerError.html" title="enum re_ws_comms::RerunServerError">RerunServerError</a>&gt;</h4></section></summary><div class="docblock"><p>Create new <a href="struct.RerunServer.html" title="struct re_ws_comms::server::RerunServer"><code>RerunServer</code></a> to relay [<code>LogMsg</code>]s to a websocket.
 The websocket will be available at <code>port</code>.</p>
 <p>A <code>bind_ip</code> of <code>&quot;0.0.0.0&quot;</code> is a good default.
